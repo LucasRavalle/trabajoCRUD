@@ -32,6 +32,7 @@ const controller = {
 	store: (req, res) => {
 		const product = req.body
 		product.id = products.length +1
+		product.image = req.file ? req.file.filename : 'default-image-png'
 		
 		products.push(product)
 
