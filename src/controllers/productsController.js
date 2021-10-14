@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const {validationResult} = require('express-validator')
 
 const productsFilePath = path.join(__dirname, '../data/productsDataBase.json');
 let products = JSON.parse(fs.readFileSync(productsFilePath, 'utf-8'));
@@ -30,15 +31,23 @@ const controller = {
 	
 	// Create -  Method to store
 	store: (req, res) => {
-		const product = req.body
-		product.id = products.length +1
-		product.image = req.file ? req.file.filename : 'default-image-png'
-		
-		products.push(product)
+		const errors = validationResult(req)
 
-		fs.writeFileSync(productsFilePath, JSON.stringify(products, null, 2))
+		if (errors.isEmpty()){
+			const product = req.body
+			product.id = products.length +1
+			product.image = req.file ? req.file.filename : 'default-image-png'
+			
+			products.push(product)
 
-		res.redirect(`/products/detail/${product.id}`)
+			fs.writeFileSync(productsFilePath, JSON.stringify(products, null, 2))
+
+			res.redirect(`/products/detail/${product.id}`)
+		} else {
+			res.render('product-create-form', {errors: errors.mapped(), old: req.body})
+		}
+
+
 	},
 
 	// Update - Form to edit
